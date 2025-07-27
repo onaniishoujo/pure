@@ -119,6 +119,7 @@ export const integ: IntegrationUserConfig = {
   quote: {
     // https://developer.hitokoto.cn/sentence/#%E8%AF%B7%E6%B1%82%E5%9C%B0%E5%9D%80
     server: 'https://v1.hitokoto.cn/?c=d&c=k',
+    // server: 'https://api.yyy001.com/api/quote',
     // target: (data) => (data as { hitokoto: string }).hitokoto || 'Error'
     // https://github.com/lukePeavey/quotable
     // server: 'https://api.quotable.io/quotes/random?maxLength=60',
