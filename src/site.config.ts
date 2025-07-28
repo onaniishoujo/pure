@@ -1,5 +1,53 @@
 import type { CardListData, Config, IntegrationUserConfig, ThemeUserConfig } from 'astro-pure/types'
 
+let timeDate = 0
+let times = ''
+// function runforTime(){
+var start: any = new Date("2023/08/31 00:00:00");
+
+function runforTime() {
+  var now: any = new Date();
+  now.setTime(now.getTime()+250);
+  var days = (now - start) / 1000 / 60 / 60 / 24;
+  var dnum = Math.floor(days);
+  var hours = (now - start) / 1000 / 60 / 60 - (24 * dnum);
+  var hnum: any = Math.floor(hours);
+  if(String(hnum).length === 1 ){
+    hnum = "0" + hnum;
+  }
+  var minutes = (now - start) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+  var mnum: any = Math.floor(minutes);
+  if(String(mnum).length === 1 ){
+    mnum = "0" + mnum;
+  }
+  var seconds = (now - start) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+  var snum: any = Math.round(seconds);
+  if(String(snum).length === 1 ){
+    snum = "0" + snum;
+  }
+  timeDate = dnum;
+  times = hnum + "h " + mnum + "m " + snum + "s ";
+}
+runforTime();
+
+let initVisitors = 1068;
+let initPageviews = 2314;
+let umamiEnd = new Date().getTime();
+let umamiHeader = {
+    method: "GET",
+    headers: {
+        "Accept": "application/json",
+        "x-umami-api-key": "api_d3HhUeSF6DyMmOq6FpKY8JaZ4rzHIhh9",
+    },
+};
+let counter_uv: string | number = ''
+let counter_pv: string | number = ''
+const umamiResponse = await fetch("https://api.umami.is/v1/websites/312fc71b-66cf-492a-a31f-d51d17c3e528/sessions/stats?startAt=1752483669&endAt=" + umamiEnd, umamiHeader)
+const umamiData = await umamiResponse.json()
+counter_uv = umamiData.visitors.value + initVisitors
+counter_pv = umamiData.pageviews.value + initPageviews
+
+
 export const theme: ThemeUserConfig = {
   // === Basic configuration ===
   /** Title for your website. Will be used in metadata and as browser tab title. */
@@ -7,7 +55,7 @@ export const theme: ThemeUserConfig = {
   /** Will be used in index page & copyright declaration */
   author: '少女',
   /** Description metadata for your website. Can be used in page metadata. */
-  description: 'Stay hungry, stay foolish',
+  // description: 'Stay hungry, stay foolish',
   /** The default favicon for your site which should be a path to an image in the `public/` directory. */
   favicon: '/favicon/favicon.ico',
   /** Specify the default language for this site. */
@@ -50,7 +98,8 @@ export const theme: ThemeUserConfig = {
       { title: 'Blog', link: '/blog' },
       // { title: 'Projects', link: '/projects' },
       { title: 'Links', link: '/links' },
-      { title: 'About', link: '/about' }
+      { title: 'About', link: '/about' },
+      { title: 'Praline', link: '/praline' },
     ]
   },
 
@@ -66,6 +115,16 @@ export const theme: ThemeUserConfig = {
       //   link: 'https://icp.gov.moe/?keyword=114514',
       //   style: 'text-sm' // Uno/TW CSS class
       // },
+      {
+        title: 'Running for ' + timeDate + 'd ' + times,
+        link: '/',
+        style: 'text-sm' // Uno/TW CSS class
+      },
+      {
+        title: counter_uv + ' Visitors ' + counter_pv + ' Views',
+        link: '/',
+        style: 'text-sm' // Uno/TW CSS class
+      },
       // {
       //   title: 'Travelling',
       //   link: 'https://www.travellings.cn/go.html',

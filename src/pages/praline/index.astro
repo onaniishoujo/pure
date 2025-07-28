@@ -14,15 +14,23 @@ import PageLayout from '@/layouts/CommonPage.astro'
 // ]
 ---
 
-<PageLayout title='About' info='/about'>
-<ul>
-<li>少女</li>
-<li>永远16岁</li>
-<li>miku的老婆</li>
-</ul>
-<p><del>明年就高一了</del> <del>已经高一了呜呜呜</del> 真的高二了...<br>
-喜欢初音未来、Python娘、动漫及代码<br>
-<del>周末小概率更新</del>
-<br>我不演了，一年没写东西了</p>
-<Comment slot='bottom' />
+<PageLayout title='Praline' info='/praline'>
+  <div id="artitalk_main"></div>
+<script is:inline>
+  (function() {
+    const script = document.createElement('script');
+    script.src = '/artitalk.js';
+    script.onload = () => {
+      new Artitalk({
+        appId: 'id',
+        appKey: 'key',
+        serverURL: 'https://artitalk.shoujo.ggff.net',
+        color1: '#8DC9D3',
+        color2: '#FFBFD7',
+      });
+    };
+    document.body.appendChild(script);
+  })();
+</script>
+  <Comment slot='bottom' />
 </PageLayout>
