@@ -20,7 +20,6 @@ const MAX_POSTS = 10
 const allPosts = await getBlogCollection()
 const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 ---
-
 <PageLayout meta={{ title: 'Home' }} highlightColor='#9ad1d8'>
   <main class='flex w-full flex-col items-center'>
     <section class='animate mb-10 flex flex-col items-center gap-y-7' id='content-header'>
@@ -185,5 +184,62 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
       </Section>
     </div>
     <Quote class='mt-12' />
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', ()=>{
+        let timeDate = 0
+        let times = ''
+        // function runforTime(){
+        var start = new Date("2023/08/31 00:00:00");
+
+        function runforTime() {
+          var now = new Date();
+          now.setTime(now.getTime()+250);
+          var days = (now - start) / 1000 / 60 / 60 / 24;
+          var dnum = Math.floor(days);
+          var hours = (now - start) / 1000 / 60 / 60 - (24 * dnum);
+          var hnum = Math.floor(hours);
+          if(String(hnum).length === 1 ){
+            hnum = "0" + hnum;
+          }
+          var minutes = (now - start) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          var mnum = Math.floor(minutes);
+          if(String(mnum).length === 1 ){
+            mnum = "0" + mnum;
+          }
+          var seconds = (now - start) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          var snum = Math.round(seconds);
+          if(String(snum).length === 1 ){
+            snum = "0" + snum;
+          }
+          timeDate = dnum;
+          times = hnum + "h " + mnum + "m " + snum + "s ";
+        }
+        runforTime();
+
+        let initVisitors = 1068;
+        let initPageviews = 2314;
+        let umamiEnd = Math.ceil((new Date().getTime())/1000);
+        let umamiHeader = {
+          method: "GET",
+          headers: {
+              "Accept": "application/json",
+              "x-umami-api-key": "api_d3HhUeSF6DyMmOq6FpKY8JaZ4rzHIhh9",
+          },
+        };
+        fetch("https://api.umami.is/v1/websites/312fc71b-66cf-492a-a31f-d51d17c3e528/sessions/stats?startAt=1752483669&endAt=" + umamiEnd, umamiHeader)
+        .then((rp)=>rp.json())
+        .then((data)=>{
+          var counter_uv = data.visitors.value + initVisitors
+          var counter_pv = data.pageviews.value + initPageviews
+          innerReplace('counter_pv', counter_pv)
+          innerReplace('counter_uv', ' '+counter_uv)
+        })
+        function innerReplace(el, text) {
+          document.getElementById(el).innerHTML = text
+        }
+        innerReplace('timeDate', timeDate)
+        innerReplace('times', times)
+      })
+    </script>
   </main>
 </PageLayout>
