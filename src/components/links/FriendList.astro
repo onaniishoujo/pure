@@ -28,7 +28,7 @@ const { title, list: friend_list, ...props } = Astro.props
 ---
 
 {title && <h2 id={friend_list.id_name}>{title}</h2>}
-<div class='grid gap-3.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3' {...props}>
+<div class='grid h-28 gap-3.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3' {...props}>
   {
     friend_list.link_list.length > 0 ? (
       shuffle(friend_list.link_list).map((frd: friend) => (

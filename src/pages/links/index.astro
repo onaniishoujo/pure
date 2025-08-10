@@ -1,69 +1,27 @@
 ---
-// import links from 'public/links.json'
+import links from 'public/links.json'
 import config from 'virtual:config'
 
 import { Comment } from 'astro-pure/advanced'
-// import { Collapse, Timeline } from 'astro-pure/user'
+import { Collapse, Timeline } from 'astro-pure/user'
 import PageLayout from '@/layouts/CommonPage.astro'
-// import FriendList from '@/components/links/FriendList.astro'
+import FriendList from '@/components/links/FriendList.astro'
 
-// const { friends } = links
+// const headings = [
+//   { depth: 2, slug: 'common-links', text: 'Common Links' },
+//   { depth: 2, slug: 'special-links', text: 'Special Links' },
+//   { depth: 2, slug: 'apply-links', text: 'Apply Links' }
+// ]
+
+const { friends } = links
 const linksConf = config.integ.links
 ---
-{/*
-<PageLayout title='Links' {headings} info='/links'>
-  <p>怎么可能有顺序呢，当然是随机的~ It's random</p>
-  <h2 id='common-links'>Common Links</h2>
+
+<PageLayout title='Links' info='/links'>
   <FriendList list={friends[0]} />
-  <Collapse title='Links with Bad Status'>
-    <FriendList list={friends[1]} />
-  </Collapse>
   <Collapse title='Link History Book'>
     <Timeline events={linksConf.logbook} />
   </Collapse>
-  <h2 id='special-links'>Special Links</h2>
-  <FriendList list={friends[2]} />
-
-  <!-- apply-links -->
-  <h2 id='apply-links'>Apply Links</h2>
-  <p>本站信息如下 The site information（点击快速复制）：</p>
-  <blockquote class='not-prose grid grid-cols-[auto_1fr] gap-x-2 break-words border-s-4 ps-4'>
-    {
-      linksConf.applyTip.map(({ name, val }) => {
-        const script = `navigator.clipboard.writeText('${val}');document.dispatchEvent(new CustomEvent('toast',{detail:{message:'Copied "${val}" to clipboard!'}}))`
-        return (
-          <>
-            <span class='text-end'>{name}:</span>
-            <samp class='cursor-pointer' onclick={script}>
-              {val}
-            </samp>
-          </>
-        )
-      })
-    }
-  </blockquote>
-
-  <p>
-    申请时还请按照这个模板留言（<a
-      href='https://github.com/cworld1/astro-theme-pure/blob/main/public/links.json'
-      target='_blank'>提交 PR</a
-    > 或许也是个更快的办法）。此外有关申请说明：
-  </p>
-  <ul>
-    <li>在你的友链上添加了本站；</li>
-    <li>请确保你的站点活着；</li>
-    <li>博客内容不违反国家法律。</li>
-  </ul>
-  <Comment slot='bottom' />
-</PageLayout>
-*/}
-
-<PageLayout title='Links' info='/links'>
-  <p>友链通过率</p>
-  <img style="overflow: scroll" src="/lhospital.jpg">
-  <p><del>所以你提交友链就是100%通过</del></p>
-  <p>还没有人跟我提过友链的事...只要提交都会通过的...</p>
-  <p><del>要不是Astro Pure有这个页面我是不会想着弄友链的...</del></p>
 
   <!-- apply-links -->
   <h2 id='apply-links'>Apply Links</h2>
@@ -88,6 +46,7 @@ const linksConf = config.integ.links
   <ul>
     <li>博客内容不违反国家法律。</li>
   </ul>
-  <p><del>我觉得这个要求已经足够了...</del></p>
+  <p><del>我觉得这个要求已经足够了</del></p>
+  <p>2024-08-05: 我竟然加到友链了，热烈庆祝🎇</p>
   <Comment slot='bottom' />
 </PageLayout>

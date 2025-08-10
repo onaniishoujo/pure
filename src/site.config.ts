@@ -50,9 +50,10 @@ export const theme: ThemeUserConfig = {
     menu: [
       { title: 'Blog', link: '/blog' },
       // { title: 'Projects', link: '/projects' },
+      { title: 'Praline', link: '/praline' },
+      // { title: 'Latte', link: '/latte' },
       { title: 'Links', link: '/links' },
       { title: 'About', link: '/about' },
-      { title: 'Praline', link: '/praline' },
     ]
   },
 
@@ -102,16 +103,14 @@ export const integ: IntegrationUserConfig = {
   links: {
     // Friend logbook
     logbook: [
-      { date: '2024-07-01', content: 'Lorem ipsum dolor sit amet.' },
-      { date: '2024-07-01', content: 'vidit suscipit at mei.' },
-      { date: '2024-07-01', content: 'Quem denique mea id.' }
+      { date: '2024-08-05', content: '喵鱼aのblog aurzex.top' },
     ],
     // Yourself link info
     applyTip: [
       { name: 'Name', val: theme.title },
       { name: 'Desc', val: theme.description || 'Null' },
       { name: 'Link', val: 'https://onaniishoujo.github.io/' },
-      { name: 'Avatar', val: 'src/assets/avatar.jpg' }
+      { name: 'Avatar', val: 'https://onaniishoujo.github.io/avatar.png' }
     ]
   },
   // Enable page search function

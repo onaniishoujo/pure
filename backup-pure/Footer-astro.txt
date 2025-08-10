@@ -1,0 +1,159 @@
+---
+import config from 'virtual:config'
+
+import { Icon } from '../user'
+
+const footerConf = config.footer
+let social = footerConf.social || {}
+
+// If the list does not contain rss, add it
+social.rss = {
+  label: 'RSS',
+  url: '/rss.xml'
+}
+
+const footerLink1 = footerConf.links?.filter(({ pos }) => pos === 1) || []
+---
+
+<footer class='mx-auto mb-5 mt-16'>
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', ()=>{
+      let timeDate = 0
+        let times = ''
+        // function runforTime(){
+        var start = new Date("2023/08/31 00:00:00");
+
+        function runforTime() {
+          var now = new Date();
+          now.setTime(now.getTime()+250);
+          var days = (now - start) / 1000 / 60 / 60 / 24;
+          var dnum = Math.floor(days);
+          var hours = (now - start) / 1000 / 60 / 60 - (24 * dnum);
+          var hnum = Math.floor(hours);
+          if(String(hnum).length === 1 ){
+            hnum = "0" + hnum;
+          }
+          var minutes = (now - start) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          var mnum = Math.floor(minutes);
+          if(String(mnum).length === 1 ){
+            mnum = "0" + mnum;
+          }
+          var seconds = (now - start) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          var snum = Math.round(seconds);
+          if(String(snum).length === 1 ){
+            snum = "0" + snum;
+          }
+          timeDate = dnum;
+          times = hnum + "h " + mnum + "m " + snum + "s ";
+        }
+        runforTime();
+
+        let initVisitors = 1068;
+        let initPageviews = 2314;
+        let umamiEnd = Math.ceil((new Date().getTime())/1000);
+        let umamiHeader = {
+          method: "GET",
+          headers: {
+              "Accept": "application/json",
+              "x-umami-api-key": "api_d3HhUeSF6DyMmOq6FpKY8JaZ4rzHIhh9",
+          },
+        };
+        fetch("https://api.umami.is/v1/websites/312fc71b-66cf-492a-a31f-d51d17c3e528/sessions/stats?startAt=1752483669&endAt=" + umamiEnd, umamiHeader)
+        .then((rp)=>rp.json())
+        .then((data)=>{
+          var counter_uv = data.visitors.value + initVisitors
+          var counter_pv = data.pageviews.value + initPageviews
+          innerReplace('counter_pv', counter_pv)
+          innerReplace('counter_uv', ' '+counter_uv)
+        })
+        function innerReplace(el, text) {
+          document.getElementById(el).innerHTML = text
+        }
+        innerReplace('timeDate', timeDate)
+        innerReplace('times', times)
+      })
+    </script>
+  <div class='border-t pt-5'>
+    <div class='flex items-center gap-y-3 max-sm:flex-col sm:justify-between sm:gap-y-0'>
+      <div
+        class='flex items-center gap-x-4 gap-y-2 text-muted-foreground max-sm:flex-col [&_a]:text-foreground'
+      >
+        {/* Position 1 */}
+        {
+          footerLink1.length > 0 && (
+            <div>
+              {footerLink1.map(({ title, link, style }, index) => (
+                <span>
+                  <a href={link} target='_blank' class={style}>
+                    {title}
+                  </a>
+                  {index < footerLink1.length - 1 && ' • '}
+                </span>
+              ))}
+            </div>
+          )
+        }
+        {/* Position 2 */}
+        <div>
+          {config.footer.year}
+          {config.author}
+          {
+            footerConf.links && footerConf.links.length > 0 && (
+              <>
+                &
+                <span>
+                  {footerConf.links
+                    .filter(({ pos }) => pos === 2)
+                    .map(({ title, link, style }) => (
+                      <span>
+                        <a href={link} target='_blank' class={style}>
+                          {title}
+                        </a>
+                      </span>
+                    ))}
+                </span>
+              </>
+            )
+          }
+        </div>
+        {
+          footerConf.credits && (
+            <script>
+              
+            </script>
+            <span>
+              <a href='https://github.com/withastro/astro' target='_blank'>
+                Astro
+              </a>
+              &
+              <a href='https://github.com/cworld1/astro-theme-pure' target='_blank'>
+                Pure
+              </a>
+              theme powered
+            </span>
+
+            <span>
+              <span id="counter_uv"></span>&nbsp;Visitors <span id="counter_pv"></span> Views & Running for <span id="timeDate"></span>d <span id="times"></span>
+            </span>
+          )
+        }
+      </div>
+
+      {/* Social Brands */}
+      <div class='flex items-center gap-x-4'>
+        {
+          footerConf.social &&
+            Object.entries(footerConf.social).map(([platform, { label, url }]) => (
+              <a
+                class='inline-block text-muted-foreground transition-all hover:text-muted-foreground/75'
+                href={url}
+                aria-label={label}
+              >
+                <Icon name={platform as keyof typeof footerConf.social} />
+              </a>
+            ))
+        }
+      </div>
+    </div>
+  </div>
+</footer>

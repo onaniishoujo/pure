@@ -1,5 +1,5 @@
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
-import vercel from '@astrojs/vercel'
+// import vercel from '@astrojs/vercel'
 import AstroPureIntegration from 'astro-pure'
 import { defineConfig } from 'astro/config'
 import rehypeKatex from 'rehype-katex'
@@ -25,7 +25,7 @@ import config from './src/site.config.ts'
 // https://astro.build/config
 export default defineConfig({
   // Top-Level Options
-  site: 'https://astro-pure.js.org',
+  site: 'https://onaniishoujo.github.io/',
   // base: '/docs',
   trailingSlash: 'never',
 
