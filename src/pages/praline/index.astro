@@ -2,6 +2,11 @@
 import { Comment } from 'astro-pure/advanced'
 import PageLayout from '@/layouts/CommonPage.astro'
 ---
+<style is:global>
+.cbp_tmlabel {
+  color: unset !important;
+}
+</style>
 
 <PageLayout title='Praline' info='/praline'>
   <div id="artitalk_main"></div>
@@ -14,8 +19,9 @@ import PageLayout from '@/layouts/CommonPage.astro'
         appId: 'id',
         appKey: 'key',
         serverURL: 'https://artitalk.shoujo.ggff.net',
-        color1: '#8DC9D3',
-        color2: '#FFBFD7',
+        color1: 'hsl(var(--muted) / var(--un-bg-opacity, 1))',
+        // color1: 'hsl(var(--background) / var(--un-bg-opacity))',
+        color2: 'hsl(var(--muted) / var(--un-bg-opacity, 1))',
       });
     };
     document.body.appendChild(script);

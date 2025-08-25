@@ -4,16 +4,17 @@ import { Image } from 'astro:assets'
 import { Quote } from 'astro-pure/advanced'
 import { PostPreview } from 'astro-pure/components/pages'
 import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
-import { Button, Card, Icon, Label } from 'astro-pure/user'
+// import { Button, Card, Icon, Label } from 'astro-pure/user'
+import { Button, Icon, Label } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
-import ProjectCard from '@/components/home/ProjectCard.astro'
+// import ProjectCard from '@/components/home/ProjectCard.astro'
 import Section from '@/components/home/Section.astro'
 import SkillLayout from '@/components/home/SkillLayout.astro'
 import avatar from '@/assets/avatar.png'
 import config from '@/site-config'
 
 const languages = ['Python', 'Vue', 'TypeScript']
-const frontend = ['TypeScript', 'Vue', 'Vite', 'TialwindCSS']
+const frontend = ['TypeScript', 'Vue', 'Vite', 'TailwindCSS']
 const backend = ['Vercel', 'Waline', 'Umami']
 
 const MAX_POSTS = 10
