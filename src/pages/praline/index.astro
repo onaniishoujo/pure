@@ -4,6 +4,14 @@ import PageLayout from '@/layouts/CommonPage.astro'
 ---
 <style is:global>
 .cbp_tmlabel {
+  /* color: unset !important; */
+  color: hsl(var(--foreground) / var(--un-text-opacity)) !important;
+}
+.power {
+  color: unset !important;
+}
+
+.at_button {
   color: unset !important;
 }
 </style>
@@ -13,15 +21,15 @@ import PageLayout from '@/layouts/CommonPage.astro'
 <script is:inline>
   (function() {
     const script = document.createElement('script');
-    script.src = '/artitalk.js';
+    script.src = '/scripts/artitalk.js';
     script.onload = () => {
       new Artitalk({
         appId: 'id',
         appKey: 'key',
         serverURL: 'https://artitalk.shoujo.ggff.net',
-        color1: 'hsl(var(--muted) / var(--un-bg-opacity, 1))',
-        // color1: 'hsl(var(--background) / var(--un-bg-opacity))',
-        color2: 'hsl(var(--muted) / var(--un-bg-opacity, 1))',
+        // color1: 'hsl(var(--muted) / var(--un-bg-opacity, 1))',
+        color1: 'hsl(var(--background) / var(--un-bg-opacity))',
+        color2: 'hsl(var(--background) / var(--un-bg-opacity))',
       });
     };
     document.body.appendChild(script);
