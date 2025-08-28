@@ -27,7 +27,8 @@ jobs:
           DIST_DIR: dist
         run: |
           cd $DIST_DIR
-          git remote add origin https://onaniishoujo:{{ secret.DEPLOY_PRIVATE_KEY }}@github.com/onaniishoujo/onaniishoujo.github.io.git
+          git init
+          git remote set-url origin https://{{ secret.DEPLOY_PRIVATE_KEY }}@github.com/onaniishoujo/onaniishoujo.github.io.git
           git config user.name "GitHub Actions Bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
