@@ -1,0 +1,234 @@
+---
+import { Image } from 'astro:assets'
+
+export interface Props {
+  animes: { title: string; cover: string; index_show?: string; evaluate?: string }[]
+}
+
+const { animes } = Astro.props
+
+// 分页配置
+const itemsPerPage = 5
+const totalPages = Math.ceil(animes.length / itemsPerPage)
+const currentPage = 1
+const currentAnimes = animes.slice(0, itemsPerPage)
+
+// 生成唯一ID
+const instanceId = Math.random().toString(36).substring(2, 9)
+---
+
+<div class='container mx-auto px-4 sm:px-0 py-8' data-instance-id={instanceId}>
+  <!-- 动漫列表 -->
+  <div class='anime-list grid grid-cols-1 gap-6'>
+    {
+      currentAnimes.map((anime) => (
+        <div class='anime-item group flex flex-col sm:flex-row bg-white dark:bg-[#1D1D20] rounded-xl border border-(--un-default-border-color) overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1'>
+          {/* 动漫封面 - 左侧 */}
+          <div class='sm:w-40 md:w-48 lg:w-48 h-auto overflow-hidden flex-shrink-0'>
+            <Image
+              src={anime.cover}
+              alt={anime.title}
+              inferSize={true}
+              class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+              loading='lazy'
+            />
+          </div>
+
+          {/* 动漫信息 - 右侧 */}
+          <div class='p-4 sm:p-6 flex flex-col justify-between flex-grow'>
+            <div>
+              <h2 class='text-xl font-bold text-gray-900 dark:text-white mb-2 break-words leading-tight'>
+                {anime.title}
+              </h2>
+
+              {anime.index_show && (
+                <div class='flex items-center mb-2'>
+                  <span class='text-sm text-gray-600 dark:text-gray-300'>{anime.index_show}</span>
+                </div>
+              )}
+
+              {anime.evaluate && (
+                <p class='text-gray-600 dark:text-gray-300 text-sm mb-4 mt-0 line-clamp-3'>
+                  {anime.evaluate}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <!-- 分页控件 -->
+  {
+    totalPages > 1 && (
+      <div class='pagination-controls flex justify-center mt-8'>
+        <div class='flex items-center space-x-2'>
+          {/* 上一页按钮 */}
+          <button
+            class='prev-btn px-4 py-2 rounded-md bg-[#F2F2F3] dark:bg-[#1D1D20] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+            disabled={currentPage === 1}
+            data-page='prev'
+          >
+            Prev
+          </button>
+
+          {/* 页码信息 */}
+          <span class='px-3 py-2 text-sm text-gray-600 dark:text-gray-400'>
+            <span class='current-page'>{currentPage}</span> /{' '}
+            <span class='total-pages'>{totalPages}</span>
+          </span>
+
+          {/* 下一页按钮 */}
+          <button
+            class='next-btn px-4 py-2 rounded-md bg-[#F2F2F3] dark:bg-[#1D1D20] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+            disabled={currentPage === totalPages}
+            data-page='next'
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    )
+  }
+</div>
+
+<!-- 数据存储元素 -->
+<div
+  class='anime-data'
+  data-instance-id={instanceId}
+  data-animes={JSON.stringify(animes)}
+  data-items-per-page={itemsPerPage}
+  data-total-pages={totalPages}
+  style='display: none;'
+>
+</div>
+
+<style>
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+</style>
+
+<script is:inline>
+  // 等待DOM加载完成
+  document.addEventListener('DOMContentLoaded', function () {
+    // 初始化所有动漫列表组件
+    initAnimePagination()
+  })
+
+  function initAnimePagination() {
+    // 找到所有的动漫数据元素
+    const dataElements = document.querySelectorAll('.anime-data')
+
+    dataElements.forEach((dataElement) => {
+      const instanceId = dataElement.dataset.instanceId
+      const container = document.querySelector(`.container[data-instance-id="${instanceId}"]`)
+
+      if (!container) return
+
+      // 从数据属性获取数据
+      const allAnimes = JSON.parse(dataElement.dataset.animes || '[]')
+      const itemsPerPage = parseInt(dataElement.dataset.itemsPerPage || '10')
+      const totalPages = parseInt(dataElement.dataset.totalPages || '1')
+
+      let currentPage = 1
+
+      // 获取DOM元素
+      const animeList = container.querySelector('.anime-list')
+      const prevButton = container.querySelector('.prev-btn')
+      const nextButton = container.querySelector('.next-btn')
+      const currentPageSpan = container.querySelector('.current-page')
+      const totalPagesSpan = container.querySelector('.total-pages')
+
+      if (!animeList) return
+
+      // 更新页面内容
+      function updatePageContent() {
+        const startIndex = (currentPage - 1) * itemsPerPage
+        const endIndex = startIndex + itemsPerPage
+        const pageAnimes = allAnimes.slice(startIndex, endIndex)
+
+        // 清空当前列表
+        animeList.innerHTML = ''
+
+        // 添加新的动漫项目
+        pageAnimes.forEach((anime) => {
+          const animeItem = document.createElement('div')
+          animeItem.className =
+            'anime-item group flex flex-col sm:flex-row bg-white dark:bg-[#1D1D20] rounded-xl border border-(--un-default-border-color) overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1'
+
+          animeItem.innerHTML = `
+            <div class='sm:w-40 md:w-48 lg:w-48 h-auto overflow-hidden flex-shrink-0'>
+              <img
+                src="${anime.cover}"
+                alt="${anime.title}"
+                class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+                loading='lazy'
+              />
+            </div>
+            <div class='p-4 sm:p-6 flex flex-col justify-between flex-grow'>
+              <div>
+                <h2 class='text-xl font-bold text-gray-900 dark:text-white mb-2 break-words leading-tight'>
+                  ${anime.title}
+                </h2>
+                ${
+                  anime.index_show
+                    ? `
+                  <div class='flex items-center mb-2'>
+                    <span class='text-sm text-gray-600 dark:text-gray-300'>${anime.index_show}</span>
+                  </div>
+                `
+                    : ''
+                }
+                ${
+                  anime.evaluate
+                    ? `
+                  <p class='text-gray-600 dark:text-gray-300 text-sm mb-4 mt-0 line-clamp-3'>
+                    ${anime.evaluate}
+                  </p>
+                `
+                    : ''
+                }
+              </div>
+            </div>
+          `
+
+          animeList.appendChild(animeItem)
+        })
+
+        // 更新分页信息
+        if (currentPageSpan) currentPageSpan.textContent = currentPage
+        if (totalPagesSpan) totalPagesSpan.textContent = totalPages
+
+        // 更新按钮状态
+        if (prevButton) prevButton.disabled = currentPage === 1
+        if (nextButton) nextButton.disabled = currentPage === totalPages
+      }
+
+      // 事件监听 - 使用事件委托
+      container.addEventListener('click', function (event) {
+        const target = event.target
+        const pageAction = target.dataset.page
+
+        if (pageAction === 'prev' && currentPage > 1) {
+          currentPage--
+          updatePageContent()
+          // 滚动到顶部
+          container.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        } else if (pageAction === 'next' && currentPage < totalPages) {
+          currentPage++
+          updatePageContent()
+          // 滚动到顶部
+          container.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      })
+
+      // 初始化
+      updatePageContent()
+    })
+  }
+</script>

@@ -1,8 +1,28 @@
 ---
 import { Comment } from 'astro-pure/advanced'
 import PageLayout from '@/layouts/CommonPage.astro'
+import AnimeGallery from '@/components/custom/AnimeGallery.astro'
+import Sakana from '@/components/custom/Sakana.astro'
+
+import planToWatch from '../../../public/scripts/plan-to-watch.json'
+import watched from '../../../public/scripts/watched.json'
+import watching from '../../../public/scripts/watching.json'
+
+const headings = [
+  { depth: 2, slug: 'watching', text: 'Watching.json' },
+  { depth: 2, slug: 'plan-to-watch', text: 'Plan-to-Watch.json' },
+  { depth: 2, slug: 'watched', text: 'Watched.json' }
+]
 ---
 
-<PageLayout title='Latte' info='/latte'>
-    <Comment slot='bottom' />
+<PageLayout title='Latte' info='/latte' headings={headings}>
+  <p>这里是我看过的、在看的和想看的动漫。数据来源于Bilibili和Bangumi。</p>
+  <h2 id='watched'>Watched.json</h2>
+  <AnimeGallery animes={watched} />
+  <h2 id='watching'>Watching.json</h2>
+  <AnimeGallery animes={watching} />
+  <h2 id='plan-to-watch'>Plan-to-Watch.json</h2>
+  <AnimeGallery animes={planToWatch} />
+  <Sakana />
+  <Comment slot='bottom' />
 </PageLayout>
