@@ -1,0 +1,649 @@
+---
+interface MemoNode {
+  type: string;
+  paragraphNode?: {
+    children: Array<{
+      type: string;
+      textNode: { content: string };
+    }>;
+  };
+  lineBreakNode?: Record<string, never>;
+}
+
+interface Memo {
+  name: string;
+  content: string;
+  createTime: string;
+  displayTime: string;
+  updateTime: string;
+  nodes: MemoNode[];
+  visibility: string;
+  tags: string[];
+  pinned: boolean;
+  snippet: string;
+  creator?: string;  // 添加作者字段
+}
+
+interface MemoResponse {
+  memos: Memo[];
+  nextPageToken: string;
+}
+
+interface MemoDisplayOptions {
+  pageSize?: number;
+  showTime?: boolean;
+  showTags?: boolean;
+  showAuthor?: boolean;
+  avatarUrl?: string;  // 头像URL
+  authorName?: string; // 作者名称
+}
+
+interface Props {
+  options?: MemoDisplayOptions;
+}
+
+const { options = {} } = Astro.props;
+const defaultOptions: Required<MemoDisplayOptions> = {
+  pageSize: 5,
+  showTime: true,
+  showTags: true,
+  showAuthor: true,
+  avatarUrl: '',
+  authorName: 'Caramel'
+};
+const config = { ...defaultOptions, ...options };
+---
+
+<!-- 组件容器 -->
+<div class="memo-display-container" 
+     data-page-size={config.pageSize}
+     data-show-time={config.showTime}
+     data-show-tags={config.showTags}
+     data-show-author={config.showAuthor}
+     data-avatar-url={config.avatarUrl}
+     data-author-name={config.authorName}>
+  
+  <!-- 头部 -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full overflow-hidden">
+        <img 
+          src={config.avatarUrl} 
+          alt={config.authorName}
+          class="w-full h-full object-cover"
+          loading="lazy"
+        />
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+          {config.authorName}的Memos
+        </h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400" id="memo-count">
+          加载中...
+        </p>
+      </div>
+    </div>
+    
+    <button 
+      onclick="memoApp.refreshMemos()"
+      class="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-[#2d2d30] dark:hover:bg-[#3d3d40] text-gray-700 dark:text-gray-300 rounded-lg transition-colors flex items-center gap-1 group"
+      id="refresh-btn"
+      title="刷新备忘录"
+    >
+      <i class="fas fa-sync text-sm group-hover:rotate-180 transition-transform duration-300"></i>
+      刷新
+    </button>
+  </div>
+
+  <!-- 加载状态 -->
+  <div id="loading-state" class="py-12 text-center">
+    <div class="inline-flex flex-col items-center gap-4">
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-gray-200 dark:border-[#2d2d30] rounded-full"></div>
+        <div class="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full absolute top-0 left-0 animate-spin"></div>
+      </div>
+      <div>
+        <p class="text-gray-600 dark:text-gray-400 font-medium">正在加载Memos...</p>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">请稍候</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 错误状态 -->
+  <div id="error-state" class="hidden py-12 text-center">
+    <div class="inline-flex flex-col items-center gap-4 max-w-md mx-auto">
+      <div class="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+        <i class="fas fa-exclamation-triangle text-3xl text-red-500 dark:text-red-400"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">加载失败</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6" id="error-message"></p>
+        <button 
+          onclick="memoApp.refreshMemos()"
+          class="px-5 py-2.5 bg-blue-400 hover:bg-blue-500 dark:bg-blue-400 dark:hover:bg-blue-500 text-white rounded-lg transition-colors flex items-center gap-2 mx-auto"
+        >
+          <i class="fas fa-redo"></i>
+          重新加载
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 空状态 -->
+  <div id="empty-state" class="hidden py-12 text-center">
+    <div class="inline-flex flex-col items-center gap-4">
+      <div class="w-20 h-20 bg-gray-100 dark:bg-[#2d2d30] rounded-full flex items-center justify-center">
+        <i class="fas fa-sticky-note text-3xl text-gray-400 dark:text-gray-500"></i>
+      </div>
+      <div>
+        <p class="text-gray-600 dark:text-gray-400 font-medium">暂无Memos</p>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">点击刷新按钮获取最新内容</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 备忘录列表 -->
+  <div id="memo-list" class="space-y-5"></div>
+
+  <!-- 分页控制 -->
+  <div id="pagination-controls" class="hidden mt-8 pt-6 border-t border-gray-200 dark:border-[#2d2d30]">
+    <div class="flex flex-col items-center gap-4">
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        已显示 <span id="current-count" class="font-semibold text-gray-700 dark:text-gray-300">0</span> 条Memos
+      </div>
+      <button 
+        onclick="memoApp.loadMoreMemos()"
+        class="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-[#2d2d30] dark:hover:bg-[#3d3d40] text-gray-700 dark:text-gray-300 rounded-lg transition-colors flex items-center gap-1 group"
+        id="load-more-btn"
+      >
+        <i class="fas fa-plus group-hover:rotate-90 transition-transform duration-300"></i>
+        加载更多
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- UnoCSS 样式 -->
+<style is:global>
+  :root {
+    --bg-light: #ffffff;
+    --bg-dark: #1d1d20;
+    --card-light: #ffffff;
+    --card-dark: #1d1d20;
+    --border-light: #e5e7eb;
+    --border-dark: #2d2d30;
+    --text-light: #374151;
+    --text-dark: #e5e7eb;
+    --text-secondary-light: #6b7280;
+    --text-secondary-dark: #9ca3af;
+  }
+
+  .memo-card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: cardEntrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* background-color: var(--card-light); */
+    border: 1px solid;
+    margin-bottom: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .memo-card {
+      background-color: var(--card-dark);
+      border: 1px solid var(--border-dark);
+    }
+  }
+
+  .memo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .memo-card:hover {
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .memo-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.7;
+    /* color: var(--text-light); */
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .memo-content {
+      /* color: var(--text-dark); */
+    }
+  }
+
+  .memo-time {
+    /* font-family: 'SF Mono', Monaco, 'Cascadia Mono', 'Ubuntu Mono', monospace; */
+    font-size: 0.875rem;
+    color: var(--text-secondary-light);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .memo-time {
+      color: var(--text-secondary-dark);
+    }
+  }
+
+  .tag-item {
+    transition: all 0.2s ease;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: white;
+    font-weight: 500;
+  }
+
+  .tag-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  }
+
+  @keyframes cardEntrance {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  /*
+  .author-avatar {
+    border: 3px solid;
+    border-image: linear-gradient(135deg, #8b5cf6, #6366f1) 1;
+  } */
+
+  .load-more-btn {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    transition: all 0.3s ease;
+  }
+
+  .load-more-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+  }
+
+  .load-more-btn:disabled {
+    background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
+    transform: none;
+    box-shadow: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .load-more-btn {
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    }
+    
+    .load-more-btn:hover {
+      box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+    }
+    
+    .load-more-btn:disabled {
+      background: linear-gradient(135deg, #4c1d95 0%, #3730a3 100%);
+    }
+  }
+</style>
+
+<script>
+/**
+ * @typedef {import('../types/memo').Memo} Memo
+ * @typedef {import('../types/memo').MemoResponse} MemoResponse
+ */
+
+class MemoApp {
+  constructor() {
+    /** @type {Memo[]} */
+    this.memos = [];
+    this.nextPageToken = '';
+    this.isLoading = false;
+    this.hasMore = true;
+    this.currentCount = 0;
+    
+    // 从容器元素获取配置
+    const container = document.querySelector('.memo-display-container');
+    this.pageSize = parseInt(container?.dataset.pageSize || '5');
+    this.showTime = container?.dataset.showTime === 'true';
+    this.showTags = container?.dataset.showTags === 'true';
+    this.showAuthor = container?.dataset.showAuthor === 'true';
+    this.avatarUrl = container?.dataset.avatarUrl || '';
+    this.authorName = container?.dataset.authorName || '作者';
+  }
+  
+  // DOM 操作辅助方法
+  showElement(id) {
+    document.getElementById(id)?.classList.remove('hidden');
+  }
+  
+  hideElement(id) {
+    document.getElementById(id)?.classList.add('hidden');
+  }
+  
+  setButtonState(buttonId, enabled, text = null) {
+    const button = document.getElementById(buttonId);
+    if (!button) return;
+    
+    button.disabled = !enabled;
+    if (text !== null) {
+      button.innerHTML = text;
+    }
+  }
+  
+  // 格式化日期为 YYYY/MM/DD
+  formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}/${month}/${day}`;
+  }
+  
+  // 格式化详细时间
+  formatFullDateTime(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}/${month}/${day} ${hours}:${minutes}`;
+  }
+  
+  // 获取相对时间（辅助显示）
+  getRelativeTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffHours < 1) return '1小时内';
+    if (diffHours < 24) return `${diffHours}小时前`;
+    if (diffDays === 1) return '昨天';
+    if (diffDays < 7) return `${diffDays}天前`;
+    return this.formatDate(dateString);
+  }
+  
+  // 创建备忘录卡片
+  createMemoCard(memo) {
+    const card = document.createElement('div');
+    card.className = 'memo-card p-5 bg-white dark:bg-[#1d1d20] border-[#e5e7eb] dark:border-[#2d2d30]';
+    
+    // 卡片头部 - 作者信息和时间
+    const header = document.createElement('div');
+    header.className = 'flex items-start justify-between mb-4';
+    
+    // 左侧：作者信息
+    const authorSection = document.createElement('div');
+    authorSection.className = 'flex items-center gap-3';
+    
+    if (this.showAuthor) {
+      const avatarContainer = document.createElement('div');
+      avatarContainer.className = 'author-avatar w-12 h-12 rounded-full overflow-hidden flex-shrink-0';
+      
+      const avatar = document.createElement('img');
+      avatar.src = this.avatarUrl;
+      avatar.alt = this.authorName;
+      avatar.className = 'w-full h-full object-cover';
+      avatar.loading = 'lazy';
+      avatarContainer.appendChild(avatar);
+      
+      const authorInfo = document.createElement('div');
+      
+      const authorNameEl = document.createElement('div');
+      authorNameEl.className = 'font-semibold text-gray-800 dark:text-gray-200';
+      authorNameEl.textContent = this.authorName;
+      
+      const relativeTime = document.createElement('div');
+      relativeTime.className = 'text-xs text-gray-500 dark:text-gray-400';
+      relativeTime.textContent = this.getRelativeTime(memo.createTime);
+      relativeTime.title = this.formatFullDateTime(memo.createTime);
+      
+      authorInfo.appendChild(authorNameEl);
+      authorInfo.appendChild(relativeTime);
+      
+      authorSection.appendChild(avatarContainer);
+      authorSection.appendChild(authorInfo);
+    }
+    
+    // 右侧：时间和置顶标志
+    const rightSection = document.createElement('div');
+    rightSection.className = 'flex items-center gap-2';
+    
+    if (this.showTime) {
+      const timeDiv = document.createElement('div');
+      timeDiv.className = 'flex flex-col items-end';
+      
+      const timeText = document.createElement('span');
+      timeText.className = 'memo-time';
+      timeText.textContent = this.formatDate(memo.createTime);
+      timeText.title = this.formatFullDateTime(memo.createTime);
+      
+      timeDiv.appendChild(timeText);
+      rightSection.appendChild(timeDiv);
+    }
+    
+    if (memo.pinned) {
+      const pinnedBadge = document.createElement('span');
+      pinnedBadge.className = 'px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs rounded-full flex items-center gap-1';
+      pinnedBadge.innerHTML = '<i class="fas fa-thumbtack"></i> 置顶';
+      rightSection.appendChild(pinnedBadge);
+    }
+    
+    // 组装头部
+    header.appendChild(authorSection);
+    header.appendChild(rightSection);
+    
+    // 内容区域
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'mb-4';
+    
+    const content = document.createElement('div');
+    content.className = 'memo-content leading-relaxed text-gray-800 dark:text-gray-200 text-[16px]';
+    
+    // 处理内容中的换行
+    const lines = memo.content.split('\n');
+    lines.forEach((line, index) => {
+      if (line.trim()) {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = line;
+        if (index < lines.length - 1) {
+          paragraph.classList.add('mb-3');
+        }
+        content.appendChild(paragraph);
+      }
+    });
+    
+    contentDiv.appendChild(content);
+    
+    // 标签区域
+    let footer = null;
+    if (this.showTags && memo.tags && memo.tags.length > 0) {
+      footer = document.createElement('div');
+      footer.className = 'pt-4 border-t border-gray-100 dark:border-[#2d2d30]';
+      
+      const tagsContainer = document.createElement('div');
+      tagsContainer.className = 'flex flex-wrap gap-2';
+      
+      memo.tags.forEach(tag => {
+        const tagSpan = document.createElement('span');
+        tagSpan.className = 'tag-item px-3 py-1.5 text-xs rounded-full cursor-pointer';
+        tagSpan.textContent = `#${tag}`;
+        tagSpan.title = `标签: ${tag}`;
+        tagSpan.onclick = (e) => {
+          e.stopPropagation();
+          // 可以添加标签筛选功能
+          console.log(`点击标签: ${tag}`);
+        };
+        tagsContainer.appendChild(tagSpan);
+      });
+      
+      footer.appendChild(tagsContainer);
+    }
+    
+    // 组装卡片
+    card.appendChild(header);
+    card.appendChild(contentDiv);
+    if (footer) card.appendChild(footer);
+    
+    return card;
+  }
+  
+  // 更新显示状态
+  updateDisplayState() {
+    const currentCount = document.getElementById('current-count');
+    const memoCount = document.getElementById('memo-count');
+    const memoList = document.getElementById('memo-list');
+    
+    if (!currentCount || !memoCount || !memoList) return;
+    
+    if (this.memos.length === 0) {
+      this.showElement('empty-state');
+      this.hideElement('pagination-controls');
+      memoCount.textContent = '暂无Memos';
+      return;
+    }
+    
+    this.hideElement('empty-state');
+    this.showElement('pagination-controls');
+    
+    // 更新计数显示
+    currentCount.textContent = this.currentCount.toString();
+    memoCount.textContent = `已加载 ${this.currentCount} 条Memos`;
+    
+    // 更新加载更多按钮状态
+    this.setButtonState('load-more-btn', this.hasMore && !this.isLoading, 
+      this.hasMore ? '<i class="fas fa-plus group-hover:rotate-90 transition-transform duration-300"></i> 加载更多' : '<i class="fas fa-check"></i> 已加载全部');
+  }
+  
+  // 获取备忘录数据
+  async fetchMemos(pageToken = '') {
+    try {
+      this.isLoading = true;
+      this.hideElement('error-state');
+      
+      if (pageToken === '') {
+        // 首次加载
+        this.showElement('loading-state');
+        this.hideElement('pagination-controls');
+        this.memos = []; // 重置数据
+      } else {
+        // 分页加载
+        this.setButtonState('load-more-btn', false, '<i class="fas fa-spinner fa-spin"></i> 加载中...');
+      }
+      
+      // 构建请求URL
+      let url = `https://shoujo-rococo.hf.space/api/v1/memos?creatorId=1&pageSize=${this.pageSize}`;
+      if (pageToken) {
+        url += `&pageToken=${encodeURIComponent(pageToken)}`;
+      }
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`请求失败: ${response.status}`);
+      }
+      
+      /** @type {MemoResponse} */
+      const data = await response.json();
+      
+      // 更新数据
+      if (pageToken === '') {
+        this.memos = data.memos;
+      } else {
+        this.memos = [...this.memos, ...data.memos];
+      }
+      
+      this.nextPageToken = data.nextPageToken;
+      this.hasMore = !!data.nextPageToken;
+      this.currentCount = this.memos.length;
+      
+      // 重新渲染列表
+      this.renderMemoList();
+      this.updateDisplayState();
+      
+    } catch (error) {
+      console.error('获取备忘录失败:', error);
+      this.showElement('error-state');
+      const errorMsg = document.getElementById('error-message');
+      if (errorMsg) {
+        errorMsg.textContent = error.message || '无法连接到服务器，请检查网络连接';
+      }
+      
+    } finally {
+      this.isLoading = false;
+      this.hideElement('loading-state');
+      this.setButtonState('load-more-btn', true, 
+        this.hasMore ? '<i class="fas fa-plus group-hover:rotate-90 transition-transform duration-300"></i> 加载更多' : '<i class="fas fa-check"></i> 已加载全部');
+    }
+  }
+  
+  // 渲染备忘录列表
+  renderMemoList() {
+    const memoList = document.getElementById('memo-list');
+    if (!memoList) return;
+    
+    // 如果是首次加载，清空列表
+    if (this.currentCount === this.pageSize) {
+      memoList.innerHTML = '';
+    }
+    
+    // 计算要添加的备忘录（新加载的部分）
+    const startIndex = Math.max(0, this.memos.length - this.pageSize);
+    const newMemos = this.memos.slice(startIndex);
+    
+    // 添加新备忘录卡片
+    newMemos.forEach((memo, index) => {
+      const card = this.createMemoCard(memo);
+      // 设置动画延迟，产生序列入场效果
+      card.style.animationDelay = `${index * 0.1}s`;
+      memoList.appendChild(card);
+    });
+  }
+  
+  // 加载更多备忘录
+  async loadMoreMemos() {
+    if (this.isLoading || !this.hasMore) return;
+    await this.fetchMemos(this.nextPageToken);
+  }
+  
+  // 刷新备忘录
+  async refreshMemos() {
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+      refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
+      refreshBtn.disabled = true;
+    }
+    
+    try {
+      await this.fetchMemos('');
+    } finally {
+      if (refreshBtn) {
+        refreshBtn.innerHTML = '<i class="fas fa-sync text-sm group-hover:rotate-180 transition-transform duration-300"></i>刷新';
+        refreshBtn.disabled = false;
+      }
+    }
+  }
+  
+  // 初始化应用
+  init() {
+    this.fetchMemos('');
+  }
+}
+
+// 创建应用实例
+const memoApp = new MemoApp();
+
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', () => {
+  memoApp.init();
+});
+
+// 将应用实例暴露给全局
+window.memoApp = memoApp;
+</script>

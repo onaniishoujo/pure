@@ -149,7 +149,7 @@ export const integ: IntegrationUserConfig = {
   waline: {
     enable: true,
     // Server service link
-    server: 'https://shoujo-latte.hf.space/',
+    server: 'https://wltxlguxkwwsaidnjjql.supabase.co/functions/v1/proxy-example-org',
     // Refer https://waline.js.org/en/guide/features/emoji.html
     emoji: ['bmoji', 'weibo'],
     // Refer https://waline.js.org/en/reference/client/props.html
