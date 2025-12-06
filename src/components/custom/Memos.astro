@@ -290,12 +290,7 @@ const config = { ...defaultOptions, ...options };
   }
 </style>
 
-<script>
-/**
- * @typedef {import('../types/memo').Memo} Memo
- * @typedef {import('../types/memo').MemoResponse} MemoResponse
- */
-
+<script is:inline>
 class MemoApp {
   constructor() {
     /** @type {Memo[]} */
