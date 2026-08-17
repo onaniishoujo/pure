@@ -1,7 +1,4 @@
 ---
-// MemoDisplay.astro
-// 集成了 FullCoverMusicBubble 音乐卡片组件
-
 interface MemoNode {
   type: string;
   paragraphNode?: {
@@ -24,7 +21,7 @@ interface Memo {
   tags: string[];
   pinned: boolean;
   snippet: string;
-  creator?: string;
+  creator?: string;  // 添加作者字段
 }
 
 interface MemoResponse {
@@ -37,8 +34,8 @@ interface MemoDisplayOptions {
   showTime?: boolean;
   showTags?: boolean;
   showAuthor?: boolean;
-  avatarUrl?: string;
-  authorName?: string;
+  avatarUrl?: string;  // 头像URL
+  authorName?: string; // 作者名称
 }
 
 interface Props {
@@ -166,188 +163,8 @@ const config = { ...defaultOptions, ...options };
   </div>
 </div>
 
-<!-- FullCoverMusicBubble 组件样式 -->
+<!-- UnoCSS 样式 -->
 <style is:global>
-  /* FullCoverMusicBubble 组件样式 */
-  .music-bubble-full {
-    position: relative;
-    overflow: hidden;
-    border-radius: 1rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    max-width: 420px;
-    width: 100%;
-    height: 200px;
-    color: white;
-    background-color: #1a1a1a;
-  }
-
-  .music-bubble-full * {
-    box-sizing: border-box;
-  }
-
-  .music-bubble-full .cover-layer {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: flex-end;
-    z-index: 1;
-  }
-
-  .music-bubble-full .cover-layer .cover-image {
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    margin-right: 0%;
-  }
-
-  .music-bubble-full .color-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 5;
-    pointer-events: none;
-    background: linear-gradient(90deg, var(--theme-color, #3b82f6) 0%, var(--theme-color, #3b82f6) 40%, transparent 100%);
-  }
-
-  .music-bubble-full .content-layer {
-    position: relative;
-    z-index: 20;
-    padding: 1rem;
-    width: 100%;
-  }
-
-  .music-bubble-full .track-title {
-    font-size: 1.25rem;
-    line-height: 1.4;
-    margin: 0 0 0.1rem 0;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--accent-color, #fbbf24);
-  }
-
-  .music-bubble-full .track-artist {
-    font-size: 0.875rem;
-    line-height: 1.4;
-    margin: 0 0 0.5rem 0;
-    opacity: 0.9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--accent-color, #fbbf24);
-  }
-
-  @media (min-width: 768px) {
-    .music-bubble-full .track-title { font-size: 1.5rem; }
-    .music-bubble-full .track-artist { font-size: 1rem; }
-  }
-
-  .music-bubble-full .controls {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .music-bubble-full .ctrl-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    border-radius: 9999px;
-    background-color: rgba(255,255,255,0.1);
-    color: var(--accent-color, #fbbf24);
-    cursor: default;
-    opacity: 0.9;
-    transition: none;
-    width: 1.5rem;
-    height: 1.5rem;
-    font-size: 0.75rem;
-    line-height: 1;
-  }
-
-  .music-bubble-full .play-btn {
-    width: 2rem;
-    height: 2rem;
-    font-size: 1rem;
-    background-color: rgba(255,255,255,0.2);
-  }
-
-  .music-bubble-full .progress-wrapper {
-    width: 100%;
-    margin-top: 0.25rem;
-  }
-
-  .music-bubble-full .progress-track {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  .music-bubble-full .progress-bg {
-    width: 100%;
-    height: 0.25rem;
-    border-radius: 9999px;
-    overflow: hidden;
-    background-color: var(--theme-color, #3b82f6);
-    opacity: 0.3;
-  }
-
-  .music-bubble-full .progress-fill {
-    height: 100%;
-    background-color: var(--accent-color, #fbbf24);
-    transition: width 0.3s ease;
-    box-shadow: 0 0 8px rgba(255,255,255,0.3);
-  }
-
-  .music-bubble-full .progress-knob {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 9999px;
-    background-color: var(--accent-color, #fbbf24);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    transition: left 0.3s ease;
-    z-index: 25;
-  }
-
-  .music-bubble-full .time-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.8);
-    margin-top: 0.15rem;
-  }
-
-  .music-bubble-full .deco-notes {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    font-size: 1.5rem;
-    line-height: 1;
-    color: rgba(255,255,255,0.3);
-    user-select: none;
-    pointer-events: none;
-    z-index: 20;
-  }
-
-  .music-bubble-full button[disabled] {
-    pointer-events: none;
-    opacity: 0.9;
-  }
-
-  @media (max-width: 480px) {
-    .music-bubble-full { height: 180px; }
-    .music-bubble-full .track-title { font-size: 1rem; }
-    .music-bubble-full .track-artist { font-size: 0.75rem; }
-  }
-
-  /* 原有样式 */
   :root {
     --bg-light: #ffffff;
     --bg-dark: #1d1d20;
@@ -366,6 +183,7 @@ const config = { ...defaultOptions, ...options };
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     animation: cardEntrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* background-color: var(--card-light); */
     border: 1px solid var(--border-light);
     margin-bottom: 8px;
   }
@@ -373,6 +191,7 @@ const config = { ...defaultOptions, ...options };
   @media (prefers-color-scheme: dark) {
     .memo-card {
       background-color: var(--card-dark);
+      /* border: 1px solid var(--border-dark); */
     }
   }
 
@@ -381,10 +200,29 @@ const config = { ...defaultOptions, ...options };
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   }
 
+  @media (prefers-color-scheme: dark) {
+    .memo-card:hover {
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+  }
+
   .memo-content {
     white-space: pre-wrap;
     word-break: break-word;
     line-height: 1.7;
+    /* color: var(--text-light); */
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .memo-content {
+      /* color: var(--text-dark); */
+    }
+  }
+
+  .memo-time {
+    /* font-family: 'SF Mono', Monaco, 'Cascadia Mono', 'Ubuntu Mono', monospace; */
+    font-size: 0.875rem;
+    color: var(--text-secondary-light);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -415,6 +253,11 @@ const config = { ...defaultOptions, ...options };
       transform: translateY(0) scale(1);
     }
   }
+  /*
+  .author-avatar {
+    border: 3px solid;
+    border-image: linear-gradient(135deg, #8b5cf6, #6366f1) 1;
+  } */
 
   .load-more-btn {
     background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
@@ -486,7 +329,7 @@ class MemoApp {
     }
   }
   
-  // 格式化日期
+  // 格式化日期为 YYYY/MM/DD
   formatDate(dateString) {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -495,6 +338,7 @@ class MemoApp {
     return `${year}/${month}/${day}`;
   }
   
+  // 格式化详细时间
   formatFullDateTime(dateString) {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -505,6 +349,7 @@ class MemoApp {
     return `${year}/${month}/${day} ${hours}:${minutes}`;
   }
   
+  // 获取相对时间（辅助显示）
   getRelativeTime(dateString) {
     const date = new Date(dateString);
     const now = new Date();
@@ -519,258 +364,16 @@ class MemoApp {
     return this.formatDate(dateString);
   }
   
-  /**
-   * 解析音乐卡片配置
-   * @param {string} content - 备忘录内容
-   * @returns {MusicCardConfig|null}
-   */
-  parseMusicCard(content) {
-    if (!content.trim().startsWith('[music]')) {
-      return null;
-    }
-
-    try {
-      const configStr = content.replace('[music]', '').trim();
-      const lines = configStr.split('\n').filter(line => line.trim());
-      const config = {};
-      
-      for (const line of lines) {
-        const match = line.match(/^([a-zA-Z0-9_]+)\s*=\s*['"]?([^'"]*)['"]?$/);
-        if (match) {
-          const [, key, value] = match;
-          config[key] = value.trim();
-        }
-      }
-      
-      if (!config.coverUrl || !config.title || !config.artist) {
-        console.warn('音乐卡片配置缺少必要字段');
-        return null;
-      }
-      
-      return {
-        coverUrl: config.coverUrl,
-        title: config.title,
-        artist: config.artist,
-        alt: config.alt || '音乐封面',
-        progress: parseInt(config.progress) || 45,
-        isPlaying: config.isPlaying === 'true'
-      };
-    } catch (error) {
-      console.error('解析音乐卡片配置失败:', error);
-      return null;
-    }
-  }
-  
-  /**
-   * 创建 FullCoverMusicBubble 音乐卡片
-   * @param {MusicCardConfig} config - 音乐卡片配置
-   * @returns {HTMLElement}
-   */
-  createMusicCard(config) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'memo-card p-0 overflow-hidden bg-transplanet border-none hover:shadow-none';
-    
-    // 创建音乐气泡容器
-    const bubble = document.createElement('div');
-    bubble.className = 'music-bubble-full';
-    bubble.id = `music-bubble-${Date.now()}-${Math.random()}`;
-    
-    // 封面层
-    const coverLayer = document.createElement('div');
-    coverLayer.className = 'cover-layer';
-    const img = document.createElement('img');
-    img.className = 'cover-image';
-    img.src = config.coverUrl;
-    img.alt = config.alt || '音乐封面';
-    img.crossOrigin = 'anonymous';
-    img.loading = 'lazy';
-    img.id = `cover-image-${Date.now()}`;
-    coverLayer.appendChild(img);
-    bubble.appendChild(coverLayer);
-    
-    // 颜色覆盖层
-    const overlay = document.createElement('div');
-    overlay.className = 'color-overlay';
-    overlay.id = `color-overlay-${Date.now()}`;
-    bubble.appendChild(overlay);
-    
-    // 内容层
-    const content = document.createElement('div');
-    content.className = 'content-layer';
-    
-    // 文字信息
-    const titleEl = document.createElement('h3');
-    titleEl.className = 'track-title';
-    titleEl.textContent = config.title;
-    
-    const artistEl = document.createElement('p');
-    artistEl.className = 'track-artist';
-    artistEl.textContent = config.artist;
-    
-    // 控制按钮
-    const controls = document.createElement('div');
-    controls.className = 'controls';
-    
-    const prevBtn = document.createElement('button');
-    prevBtn.className = 'ctrl-btn';
-    prevBtn.setAttribute('aria-label', '上一首');
-    prevBtn.disabled = true;
-    prevBtn.innerHTML = '<span aria-hidden="true">⏮</span>';
-    controls.appendChild(prevBtn);
-    
-    const playBtn = document.createElement('button');
-    playBtn.className = 'ctrl-btn play-btn';
-    playBtn.setAttribute('aria-label', config.isPlaying ? '暂停' : '播放');
-    playBtn.disabled = true;
-    playBtn.innerHTML = `<span aria-hidden="true">${config.isPlaying ? '⏸︎' : '▶'}</span>`;
-    controls.appendChild(playBtn);
-    
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'ctrl-btn';
-    nextBtn.setAttribute('aria-label', '下一首');
-    nextBtn.disabled = true;
-    nextBtn.innerHTML = '<span aria-hidden="true">⏭</span>';
-    controls.appendChild(nextBtn);
-    
-    // 进度条
-    const progressWrapper = document.createElement('div');
-    progressWrapper.className = 'progress-wrapper';
-    
-    const track = document.createElement('div');
-    track.className = 'progress-track';
-    
-    const bg = document.createElement('div');
-    bg.className = 'progress-bg';
-    bg.id = `progress-bg-${Date.now()}`;
-    
-    const fill = document.createElement('div');
-    fill.className = 'progress-fill';
-    fill.id = `progress-fill-${Date.now()}`;
-    fill.style.width = config.progress + '%';
-    bg.appendChild(fill);
-    
-    const knob = document.createElement('div');
-    knob.className = 'progress-knob';
-    knob.id = `progress-knob-${Date.now()}`;
-    knob.style.left = config.progress + '%';
-    track.appendChild(bg);
-    track.appendChild(knob);
-    
-    const timeLabels = document.createElement('div');
-    timeLabels.className = 'time-labels';
-    timeLabels.innerHTML = '<span>1:24</span><span>-3:02</span>';
-    
-    progressWrapper.appendChild(track);
-    progressWrapper.appendChild(timeLabels);
-    
-    content.appendChild(titleEl);
-    content.appendChild(artistEl);
-    content.appendChild(controls);
-    content.appendChild(progressWrapper);
-    bubble.appendChild(content);
-    
-    // 装饰音符
-    const notes = document.createElement('div');
-    notes.className = 'deco-notes';
-    notes.textContent = '♪♪';
-    bubble.appendChild(notes);
-    
-    wrapper.appendChild(bubble);
-    
-    // 颜色提取
-    this.extractColorsForMusicCard(img, overlay, bubble, fill, knob, bg, [prevBtn, playBtn, nextBtn], titleEl, artistEl);
-    
-    return wrapper;
-  }
-  
-  /**
-   * 提取颜色并应用到音乐卡片
-   */
-  async extractColorsForMusicCard(img, overlay, bubble, progressFill, progressKnob, progressBg, controlBtns, titleEl, artistEl) {
-    try {
-      // 动态导入 ColorThief
-      const module = await import('https://unpkg.com/colorthief@2.3.2/dist/color-thief.mjs');
-      const ColorThief = module.default;
-      
-      const extractAndApply = () => {
-        try {
-          const colorThief = new ColorThief();
-          const dominant = colorThief.getColor(img);
-          const palette = colorThief.getPalette(img, 8);
-          
-          if (dominant) {
-            const [r, g, b] = dominant;
-            const theme = `rgb(${r}, ${g}, ${b})`;
-            bubble.style.setProperty('--theme-color', theme);
-            overlay.style.background = `linear-gradient(90deg, ${theme} 0%, ${theme} 40%, transparent 100%)`;
-            progressBg.style.backgroundColor = theme;
-          }
-          
-          if (palette && palette.length > 1) {
-            const [r, g, b] = palette[1];
-            const accent = `rgb(${r}, ${g}, ${b})`;
-            bubble.style.setProperty('--accent-color', accent);
-            titleEl.style.color = accent;
-            artistEl.style.color = accent;
-            progressFill.style.backgroundColor = accent;
-            progressKnob.style.backgroundColor = accent;
-            controlBtns.forEach(btn => { btn.style.color = accent; });
-          }
-        } catch (err) {
-          console.warn('Color extraction failed:', err);
-          this.applyFallbackColors(bubble, overlay, progressBg, titleEl, artistEl, progressFill, progressKnob, controlBtns);
-        }
-      };
-      
-      if (img.complete) {
-        extractAndApply();
-      } else {
-        img.addEventListener('load', extractAndApply);
-        img.addEventListener('error', () => {
-          this.applyFallbackColors(bubble, overlay, progressBg, titleEl, artistEl, progressFill, progressKnob, controlBtns);
-        });
-      }
-    } catch (error) {
-      console.warn('ColorThief loading failed:', error);
-      this.applyFallbackColors(bubble, overlay, progressBg, titleEl, artistEl, progressFill, progressKnob, controlBtns);
-    }
-  }
-  
-  /**
-   * 应用回退颜色
-   */
-  applyFallbackColors(bubble, overlay, progressBg, titleEl, artistEl, progressFill, progressKnob, controlBtns) {
-    const fallbackTheme = '#3b82f6';
-    const fallbackAccent = '#fbbf24';
-    
-    bubble.style.setProperty('--theme-color', fallbackTheme);
-    bubble.style.setProperty('--accent-color', fallbackAccent);
-    overlay.style.background = `linear-gradient(90deg, ${fallbackTheme} 0%, ${fallbackTheme} 40%, transparent 100%)`;
-    progressBg.style.backgroundColor = fallbackTheme;
-    titleEl.style.color = fallbackAccent;
-    artistEl.style.color = fallbackAccent;
-    progressFill.style.backgroundColor = fallbackAccent;
-    progressKnob.style.backgroundColor = fallbackAccent;
-    controlBtns.forEach(btn => { btn.style.color = fallbackAccent; });
-  }
-  
-  // 创建普通备忘录卡片
+  // 创建备忘录卡片
   createMemoCard(memo) {
-    // 检测是否为音乐卡片
-    const musicConfig = this.parseMusicCard(memo.content);
-    
-    if (musicConfig) {
-      return this.createMusicCard(musicConfig);
-    }
-    
-    // 普通卡片
     const card = document.createElement('div');
     card.className = 'memo-card p-5 bg-white dark:bg-[#1d1d20] border-[#e5e7eb] dark:border-[#2d2d30]';
     
-    // 卡片头部
+    // 卡片头部 - 作者信息和时间
     const header = document.createElement('div');
     header.className = 'flex items-start justify-between mb-4';
     
+    // 左侧：作者信息
     const authorSection = document.createElement('div');
     authorSection.className = 'flex items-center gap-3';
     
@@ -803,6 +406,7 @@ class MemoApp {
       authorSection.appendChild(authorInfo);
     }
     
+    // 右侧：时间和置顶标志
     const rightSection = document.createElement('div');
     rightSection.className = 'flex items-center gap-2';
     
@@ -826,6 +430,7 @@ class MemoApp {
       rightSection.appendChild(pinnedBadge);
     }
     
+    // 组装头部
     header.appendChild(authorSection);
     header.appendChild(rightSection);
     
@@ -836,6 +441,7 @@ class MemoApp {
     const content = document.createElement('div');
     content.className = 'memo-content leading-relaxed text-gray-800 dark:text-gray-200 text-[16px]';
     
+    // 处理内容中的换行
     const lines = memo.content.split('\n');
     lines.forEach((line, index) => {
       if (line.trim()) {
@@ -866,6 +472,7 @@ class MemoApp {
         tagSpan.title = `标签: ${tag}`;
         tagSpan.onclick = (e) => {
           e.stopPropagation();
+          // 可以添加标签筛选功能
           console.log(`点击标签: ${tag}`);
         };
         tagsContainer.appendChild(tagSpan);
@@ -874,6 +481,7 @@ class MemoApp {
       footer.appendChild(tagsContainer);
     }
     
+    // 组装卡片
     card.appendChild(header);
     card.appendChild(contentDiv);
     if (footer) card.appendChild(footer);
@@ -881,23 +489,31 @@ class MemoApp {
     return card;
   }
   
-  // 渲染备忘录列表
-  renderMemoList() {
+  // 更新显示状态
+  updateDisplayState() {
+    const currentCount = document.getElementById('current-count');
+    const memoCount = document.getElementById('memo-count');
     const memoList = document.getElementById('memo-list');
-    if (!memoList) return;
     
-    if (this.currentCount === this.pageSize) {
-      memoList.innerHTML = '';
+    if (!currentCount || !memoCount || !memoList) return;
+    
+    if (this.memos.length === 0) {
+      this.showElement('empty-state');
+      this.hideElement('pagination-controls');
+      memoCount.textContent = '暂无Memos';
+      return;
     }
     
-    const startIndex = Math.max(0, this.memos.length - this.pageSize);
-    const newMemos = this.memos.slice(startIndex);
+    this.hideElement('empty-state');
+    this.showElement('pagination-controls');
     
-    newMemos.forEach((memo, index) => {
-      const card = this.createMemoCard(memo);
-      card.style.animationDelay = `${index * 0.1}s`;
-      memoList.appendChild(card);
-    });
+    // 更新计数显示
+    currentCount.textContent = this.currentCount.toString();
+    memoCount.textContent = `已加载 ${this.currentCount} 条Memos`;
+    
+    // 更新加载更多按钮状态
+    this.setButtonState('load-more-btn', this.hasMore && !this.isLoading, 
+      this.hasMore ? '<i class="fas fa-plus group-hover:rotate-90 transition-transform duration-300"></i> 加载更多' : '<i class="fas fa-check"></i> 已加载全部');
   }
   
   // 获取备忘录数据
@@ -907,13 +523,16 @@ class MemoApp {
       this.hideElement('error-state');
       
       if (pageToken === '') {
+        // 首次加载
         this.showElement('loading-state');
         this.hideElement('pagination-controls');
-        this.memos = [];
+        this.memos = []; // 重置数据
       } else {
+        // 分页加载
         this.setButtonState('load-more-btn', false, '<i class="fas fa-spinner fa-spin"></i> 加载中...');
       }
       
+      // 构建请求URL
       let url = `https://shoujo-rococo.hf.space/api/v1/memos?creatorId=1&pageSize=${this.pageSize}`;
       if (pageToken) {
         url += `&pageToken=${encodeURIComponent(pageToken)}`;
@@ -928,6 +547,7 @@ class MemoApp {
       /** @type {MemoResponse} */
       const data = await response.json();
       
+      // 更新数据
       if (pageToken === '') {
         this.memos = data.memos;
       } else {
@@ -938,6 +558,7 @@ class MemoApp {
       this.hasMore = !!data.nextPageToken;
       this.currentCount = this.memos.length;
       
+      // 重新渲染列表
       this.renderMemoList();
       this.updateDisplayState();
       
@@ -957,29 +578,27 @@ class MemoApp {
     }
   }
   
-  // 更新显示状态
-  updateDisplayState() {
-    const currentCount = document.getElementById('current-count');
-    const memoCount = document.getElementById('memo-count');
+  // 渲染备忘录列表
+  renderMemoList() {
     const memoList = document.getElementById('memo-list');
+    if (!memoList) return;
     
-    if (!currentCount || !memoCount || !memoList) return;
-    
-    if (this.memos.length === 0) {
-      this.showElement('empty-state');
-      this.hideElement('pagination-controls');
-      memoCount.textContent = '暂无备忘录';
-      return;
+    // 如果是首次加载，清空列表
+    if (this.currentCount === this.pageSize) {
+      memoList.innerHTML = '';
     }
     
-    this.hideElement('empty-state');
-    this.showElement('pagination-controls');
+    // 计算要添加的备忘录（新加载的部分）
+    const startIndex = Math.max(0, this.memos.length - this.pageSize);
+    const newMemos = this.memos.slice(startIndex);
     
-    currentCount.textContent = this.currentCount.toString();
-    memoCount.textContent = `已加载 ${this.currentCount} 条备忘录`;
-    
-    this.setButtonState('load-more-btn', this.hasMore && !this.isLoading, 
-      this.hasMore ? '<i class="fas fa-plus group-hover:rotate-90 transition-transform duration-300"></i> 加载更多' : '<i class="fas fa-check"></i> 已加载全部');
+    // 添加新备忘录卡片
+    newMemos.forEach((memo, index) => {
+      const card = this.createMemoCard(memo);
+      // 设置动画延迟，产生序列入场效果
+      card.style.animationDelay = `${index * 0.1}s`;
+      memoList.appendChild(card);
+    });
   }
   
   // 加载更多备忘录
