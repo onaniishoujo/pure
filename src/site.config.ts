@@ -105,6 +105,7 @@ export const integ: IntegrationUserConfig = {
     // Friend logbook
     logbook: [
       { date: '2024-08-05', content: '喵鱼aのblog aurzex.top' },
+      { date: '2026-08-17', content: 'aurzex.top -> blog.aurzex.top' },
     ],
     // Yourself link info
     applyTip: [
